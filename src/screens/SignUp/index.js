@@ -2,32 +2,46 @@ import React from 'react';
 import { StyleSheet, TouchableWithoutFeedback, StatusBar } from 'react-native';
 import { Layout, Text, Button, Input, Icon } from '@ui-kitten/components';
 import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-community/async-storage'
 
 const renderIconaccount = (props) => (
   <Icon {...props} name={'person-outline'} />
 );
 
 const SignUp = props => {
+  const STORAGE_KEY = '@user'
   const { navigation } = props;
   const [email, setEmail] = React.useState('');
   const [myanimelist, setmyanimelist] = React.useState('');
   const [password, setpassword] = React.useState('');
   const [secureTextEntry, setSecureTextEntry] = React.useState(true);
 
+  const saveData = async () => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ 'email': email, 'myanimelist': myanimelist, 'password': password, 'isLogged': true }))
+      alert('Data successfully saved')
+    } catch (e) {
+      alert('Failed to save the data to the storage')
+    }
+  };
+
   const renderIcon = (props) => (
     <TouchableWithoutFeedback onPress={toggleSecureEntry}>
       <Icon {...props} name={secureTextEntry ? 'eye-off' : 'eye'} />
     </TouchableWithoutFeedback>
   );
+
   const toggleSecureEntry = () => {
     setSecureTextEntry(!secureTextEntry);
   };
+
   const register = () => {
     if (email && password && myanimelist) {
       auth()
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
           console.log('User account created & signed in!');
+          saveData();
           navigation.navigate('SignIn', {
             email: email,
             password: password,
@@ -88,6 +102,7 @@ const SignUp = props => {
     </Layout>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
@@ -117,4 +132,5 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
 });
+
 export default SignUp;
