@@ -40,7 +40,6 @@ const SignUp = props => {
       auth()
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
-          console.log('User account created & signed in!');
           saveData();
           navigation.navigate('SignIn', {
             email: email,
@@ -49,17 +48,16 @@ const SignUp = props => {
         })
         .catch(error => {
           if (error.code === 'auth/email-already-in-use') {
-            console.log('That email address is already in use!');
+            alert('That email address is already in use!');
           }
 
           if (error.code === 'auth/invalid-email') {
-            console.log('That email address is invalid!');
+            alert('That email address is invalid!');
           }
-
-          console.error(error);
+          alert(error);
         });
     } else {
-      console.error("Fill all fields.");
+      alert("Fill all fields.");
     }
   };
 

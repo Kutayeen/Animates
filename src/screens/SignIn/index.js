@@ -3,6 +3,7 @@ import { StyleSheet, TouchableWithoutFeedback, StatusBar } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import { Layout, Text, Button, Input, Icon } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-community/async-storage'
+import auth from '@react-native-firebase/auth';
 
 const renderIconaccount = (props) => (
   <Icon {...props} name={'person-outline'} />
@@ -10,7 +11,7 @@ const renderIconaccount = (props) => (
 
 const SignIn = props => {
   const { navigation } = props;
-  const [user, setuser] = React.useState({ 'email': '', 'myanimelist': '', 'password': '', 'isLogged': '' })
+  const [user, setuser] = React.useState({ 'email': '', 'myanimelist': '', 'password': '', 'isLogged': false})
   const STORAGE_KEY = '@user'
   const [email, setEmail] = React.useState('');
   const [password, setpassword] = React.useState('');
@@ -26,6 +27,19 @@ const SignIn = props => {
       alert(e)
     }
   };
+
+  const  forgotPassword = (Email) => {
+    if(Email){
+      auth().sendPasswordResetEmail(Email)
+      .then(function (user) {
+        alert('Please check your email...')
+      }).catch(function (e) {
+        console.log(e)
+      })
+    }else{
+      alert('Please type your email...')
+    }
+  }
 
   if (typeof (props.route.params) !== "undefined") {
     React.useEffect(() => {
@@ -77,7 +91,7 @@ const SignIn = props => {
             accessoryRight={renderIcon}
             secureTextEntry={secureTextEntry}
           />
-          <Text style={{ textAlign: 'left', fontSize: 11, color: 'gray', margin: 10, marginLeft: 240 }}>Forgot your password?</Text>
+          <Text onPress={() => forgotPassword(email)} style={{ textAlign: 'left', fontSize: 11, color: 'gray', margin: 10, marginLeft: 240 }}>Forgot your password?</Text>
         </Layout>
         <Layout style={styles.layout}>
           <Button style={styles.button} appearance='filled'>
