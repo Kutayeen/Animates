@@ -3,7 +3,7 @@ import { StyleSheet, TouchableWithoutFeedback, StatusBar } from 'react-native';
 import { Layout, Text, Button, Input, Icon } from '@ui-kitten/components';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-community/async-storage'
-
+import firestore from '@react-native-firebase/firestore';
 const renderIconaccount = (props) => (
   <Icon {...props} name={'person-outline'} />
 );
@@ -16,14 +16,24 @@ const SignUp = props => {
   const [password, setpassword] = React.useState('');
   const [secureTextEntry, setSecureTextEntry] = React.useState(true);
 
-  const saveData = async () => {
+  const saveData = async (user) => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ 'email': email, 'myanimelist': myanimelist, 'password': password, 'isLogged': true }))
-      alert('Data successfully saved')
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ 'email': email, 'myanimelist': myanimelist, 'password': password, 'isLogged': false })).then(() => {
+        adduser(user);
+      })
     } catch (e) {
-      alert('Failed to save the data to the storage')
     }
   };
+
+  const adduser = async (user) => {
+    await firestore()
+      .collection('users')
+      .doc(user)
+      .set({
+        email: email,
+        myanimelist: myanimelist,
+      },{ merge: false });
+  }
 
   const renderIcon = (props) => (
     <TouchableWithoutFeedback onPress={toggleSecureEntry}>
@@ -40,7 +50,7 @@ const SignUp = props => {
       auth()
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
-          saveData();
+          saveData(auth().currentUser.uid);
           navigation.navigate('SignIn', {
             email: email,
             password: password,
