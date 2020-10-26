@@ -1,31 +1,76 @@
 import React from 'react';
-import { StyleSheet, TouchableWithoutFeedback, StatusBar } from 'react-native';
-import { Layout, Text, Button, Input, Icon } from '@ui-kitten/components';
+import { StyleSheet, StatusBar } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import ProfileScreen from '../../screens/Profile';
+import MatchesScreen from '../../screens/Matches';
+import AnimelistScreen from '../../screens/Animelist';
 
-const renderIconaccount = (props) => (
-  <Icon {...props} name={'person-outline'} />
+
+import { Layout, Text, Icon, BottomNavigation, BottomNavigationTab, } from '@ui-kitten/components';
+
+const Tabs = ['AnimeList', 'Matches', 'Profile']
+
+const { Navigator, Screen } = createBottomTabNavigator();
+
+const PersonIcon = (props) => (
+  <Icon {...props} name='person-outline' />
 );
 
+const listIcon = (props) => (
+  <Icon {...props} name='list-outline' />
+);
+
+const EmailIcon = (props) => (
+  <Icon {...props} name='email-outline' />
+);
+
+const BottomTabBar = ({ navigation, state }) => (
+  <BottomNavigation
+    selectedIndex={state.index}
+    onSelect={index => navigation.navigate(Tabs[index])}>
+    <BottomNavigationTab title='Anime List' icon={listIcon} />
+    <BottomNavigationTab title='Matches' icon={EmailIcon} />
+    <BottomNavigationTab title='Profile' icon={PersonIcon} />
+  </BottomNavigation>
+);
+
+const TabNavigator = () => (
+  <Navigator initialRouteName="Matches" tabBar={props => <BottomTabBar {...props} />}>
+    <Screen name='AnimeList' component={AnimelistScreen} />
+    <Screen name='Matches' component={MatchesScreen} />
+    <Screen name='Profile' component={ProfileScreen} />
+  </Navigator>
+);
 const Home = props => {
   const { navigation } = props;
+
   return (
-    <Layout style={styles.container}>
+    <Layout >
       <StatusBar hidden={true} />
-      <Text style={{ textAlign: 'center', fontSize: 50, color: 'gray', marginBottom: 20, }}>Home</Text>
+      <Layout style={styles.navigator}>
+        <NavigationContainer independent={true}>
+          <TabNavigator />
+        </NavigationContainer>
+      </Layout>
     </Layout>
+
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    height: '100%',
-  },
   layout: {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-end',
+  },
+  bottomNavigation: {
+    marginVertical: 8,
+  },
+  navigator: {
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    height: '100%',
   },
 });
 

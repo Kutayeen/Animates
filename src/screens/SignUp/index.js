@@ -4,6 +4,7 @@ import { Layout, Text, Button, Input, Icon } from '@ui-kitten/components';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-community/async-storage'
 import firestore from '@react-native-firebase/firestore';
+
 const renderIconaccount = (props) => (
   <Icon {...props} name={'person-outline'} />
 );
@@ -32,7 +33,7 @@ const SignUp = props => {
       .set({
         email: email,
         myanimelist: myanimelist,
-      },{ merge: false });
+      }, { merge: false });
   }
 
   const renderIcon = (props) => (
@@ -64,7 +65,6 @@ const SignUp = props => {
           if (error.code === 'auth/invalid-email') {
             alert('That email address is invalid!');
           }
-          alert(error);
         });
     } else {
       alert("Fill all fields.");
@@ -99,7 +99,6 @@ const SignUp = props => {
           accessoryRight={renderIcon}
           secureTextEntry={secureTextEntry}
         />
-
       </Layout>
       <Layout style={styles.layout}>
         <Button style={styles.button} appearance='filled'

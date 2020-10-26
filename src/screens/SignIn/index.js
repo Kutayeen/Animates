@@ -34,6 +34,7 @@ const SignIn = props => {
       auth().sendPasswordResetEmail(Email)
         .then(function (user) {
           alert('Please check your email...')
+          delete_();
         }).catch(function (e) {
           console.log(e.message)
         })
@@ -64,6 +65,14 @@ const SignIn = props => {
     }
   };
 
+  const  delete_ = async () =>{
+    try {
+        await AsyncStorage.removeItem(STORAGE_KEY);
+    }
+    catch(exception) {
+    }
+}
+
   React.useEffect(() => {
     readData();
   }, []);
@@ -74,7 +83,7 @@ const SignIn = props => {
         saveData(user['myanimelist']);
         navigation.dispatch(StackActions.replace('Home', { 'email': email, 'myanimelist': user['myanimelist'], 'password': password, 'isLogged': true }));
       }).catch(function (error) {
-        alert(error.message);
+        alert(error);
       });
     } else {
       try {
@@ -86,7 +95,7 @@ const SignIn = props => {
           saveData(myanimelist_['myanimelist']);
           navigation.dispatch(StackActions.replace('Home', { 'email': email, 'myanimelist': myanimelist_['myanimelist'], 'password': password, 'isLogged': true }));
         }).catch(function (error) {
-          console.log(error.message);
+          console.log(error);
         });
       } catch (e) {
         alert(e.message);
