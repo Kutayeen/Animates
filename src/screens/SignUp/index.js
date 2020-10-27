@@ -26,14 +26,98 @@ const SignUp = props => {
     }
   };
 
+  const fetchData = async (pages) => {
+    let response = await fetch(`https://api.jikan.moe/v3/user/${myanimelist}/animelist/all/${pages}`);
+    let data = await response.json();
+    return data.anime;
+  }
+
   const adduser = async (user) => {
-    await firestore()
-      .collection('users')
-      .doc(user)
-      .set({
-        email: email,
-        myanimelist: myanimelist,
-      }, { merge: false });
+    try {
+      fetch(`https://api.jikan.moe/v3/user/${myanimelist}`)
+        .then(response => response.json())
+        .then(myanime => {
+          (async () => {
+            await firestore()
+              .collection('users')
+              .doc(user)
+              .set({
+                email: email,
+                myanimelist: myanimelist,
+                description: myanime.about,
+                gender: myanime.gender,
+                birthday: myanime.birthday,
+                image_url: myanime.image_url,
+                location: myanime.location,
+                url: myanime.url,
+                user_id: myanime.user_id,
+                username: myanime.username
+              }, { merge: false }).then(() => {
+                (async () => {
+                  var pages = 1;
+                  var animelist = []
+                  while (true) {
+                    const abc = await fetchData(pages++);
+                    if (Array.isArray(abc) && abc.length) {
+                      animelist.push(...abc)
+                    } else {
+                      break;
+                    }
+                  };
+                  await animelist.forEach(element => {
+                    (async () => {
+                      const anime_data = await firestore().collection('AnimeList').doc(element.title);
+                      const doc = await anime_data.get();
+                      if (doc.exists) {
+                        await anime_data.collection('Users').doc(user).set({
+                          score: element.score,
+                          is_rewatching: element.is_rewatching,
+                          watched_episodes: element.watched_episodes,
+                          watching_status: element.watching_status
+                        })
+                      } else {
+                        await anime_data.set({
+                          id: element.mal_id,
+                          image_url: element.image_url,
+                          added_to_list: element.added_to_list,
+                          airing_status: element.airing_status,
+                          end_date: element.end_date,
+                          has_episode_video: element.has_episode_video,
+                          has_promo_video: element.has_promo_video,
+                          has_video: element.has_video,
+                          licensors: element.licensors,
+                          priority: element.priority,
+                          rating: element.rating,
+                          start_date: element.start_date,
+                          studios: element.studios,
+                          title: element.title,
+                          total_episodes: element.total_episodes,
+                          type: element.type,
+                          url: element.url,
+                          video_url: element.video_url
+                        }
+                        )
+                        await anime_data.collection('Users').doc(user).set({
+                          score: element.score,
+                          is_rewatching: element.is_rewatching,
+                          watched_episodes: element.watched_episodes,
+                          watching_status: element.watching_status
+                        })
+                      }
+                    })()
+                  })
+                })().then(() => {
+                  navigation.navigate('SignIn', {
+                    email: email,
+                    password: password,
+                  });
+                })
+              })();
+          })();
+        })
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const renderIcon = (props) => (
@@ -52,10 +136,6 @@ const SignUp = props => {
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
           saveData(auth().currentUser.uid);
-          navigation.navigate('SignIn', {
-            email: email,
-            password: password,
-          });
         })
         .catch(error => {
           if (error.code === 'auth/email-already-in-use') {
@@ -139,5 +219,4 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
 });
-
 export default SignUp;
