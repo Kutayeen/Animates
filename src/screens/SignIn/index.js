@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, TouchableWithoutFeedback, StatusBar } from 'react-native';
-import { StackActions } from '@react-navigation/native';
+import { StackActions, CommonActions } from '@react-navigation/native';
 import { Layout, Text, Button, Input, Icon } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-community/async-storage'
 import auth from '@react-native-firebase/auth';
@@ -53,7 +53,14 @@ const SignIn = props => {
   React.useEffect(() => {
     if (user['isLogged']) {
       console.log(user);
-      navigation.dispatch(StackActions.replace('Home'));
+      navigation.dispatch(CommonActions.reset({
+        index: 1,
+        routes: [{
+          name: 'Home', params: user,
+        },
+        ],
+      })
+      );
     }
   }, [user]);
 
@@ -65,13 +72,13 @@ const SignIn = props => {
     }
   };
 
-  const  delete_ = async () =>{
+  const delete_ = async () => {
     try {
-        await AsyncStorage.removeItem(STORAGE_KEY);
+      await AsyncStorage.removeItem(STORAGE_KEY);
     }
-    catch(exception) {
+    catch (exception) {
     }
-}
+  }
 
   React.useEffect(() => {
     readData();
@@ -79,9 +86,16 @@ const SignIn = props => {
 
   const signInfunction = async (email, password) => {
     if (user['myanimelist'] !== '') {
-      auth().signInWithEmailAndPassword(email, password).then(() => {
+      await auth().signInWithEmailAndPassword(email, password).then(() => {
         saveData(user['myanimelist']);
-        navigation.dispatch(StackActions.replace('Home', { 'email': email, 'myanimelist': user['myanimelist'], 'password': password, 'isLogged': true }));
+        navigation.dispatch(CommonActions.reset({
+          index: 1,
+          routes: [{
+            name: 'Home', params: { 'email': email, 'myanimelist': user['myanimelist'], 'password': password, 'isLogged': true },
+          },
+          ],
+        })
+        );
       }).catch(function (error) {
         alert(error);
       });
@@ -91,9 +105,16 @@ const SignIn = props => {
           .collection('users')
           .where('email', '==', email)
           .get();
-        auth().signInWithEmailAndPassword(email, password).then(() => {
+        await auth().signInWithEmailAndPassword(email, password).then(() => {
           saveData(myanimelist_['myanimelist']);
-          navigation.dispatch(StackActions.replace('Home', { 'email': email, 'myanimelist': myanimelist_['myanimelist'], 'password': password, 'isLogged': true }));
+          navigation.dispatch(CommonActions.reset({
+            index: 1,
+            routes: [{
+              name: 'Home', params: { 'email': email, 'myanimelist': myanimelist_['myanimelist'], 'password': password, 'isLogged': true },
+            },
+            ],
+          })
+          );
         }).catch(function (error) {
           console.log(error);
         });

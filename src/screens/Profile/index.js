@@ -1,14 +1,39 @@
 import React from 'react';
-import { StyleSheet, StatusBar } from 'react-native';
-import { BottomNavigation,Text, BottomNavigationTab, Layout, Icon } from '@ui-kitten/components';
-
+import { StyleSheet, StatusBar,WebView  } from 'react-native';
+import { BottomNavigation, Text, Avatar, Layout, Icon } from '@ui-kitten/components';
+import firestore from '@react-native-firebase/firestore';
+import HTMLView from 'react-native-htmlview';
 const Profile = props => {
-    const { navigation } = props;
- 
+    const { navigation, route } = props;
+    const [user, setuser] = React.useState('');
+
+    React.useEffect(() => {
+        (async () => {
+            try {
+                await firestore()
+                    .collection('users')
+                    .where('email', '==', route.params.email)
+                    .get().then(result => {setuser(result._docs[0]._data) })
+            } catch (error) {
+            }
+        })()
+    }, []);
+
+    React.useEffect(() => {
+        console.log(user)
+    }, [user]);
+    
+
     return (
-        <Layout >
-            <StatusBar hidden={true} />  
-            <Text style={{ textAlign: 'center', fontSize: 15, color: 'black', marginTop: 40, margin: 20, }}>Profile</Text>          
+        <Layout style={styles.layout}>
+            <StatusBar hidden={true} />
+            <Avatar style={styles.avatar} size='giant' source={{ uri: user['image_url']}} />
+            <Text style={{ textAlign: 'center', fontSize: 30, color: 'gray', marginTop: 40, margin: 20, }}>{user['username']}</Text>
+            <HTMLView
+        value={user['description']}
+        stylesheet={styles}
+      />
+
         </Layout>
     );
 };
@@ -16,8 +41,9 @@ const Profile = props => {
 const styles = StyleSheet.create({
     layout: {
         flexDirection: 'column',
+        flex: 1,
         alignItems: 'center',
-        justifyContent: 'flex-end',
+        justifyContent: 'flex-start',
     },
     bottomNavigation: {
         marginVertical: 8,
@@ -26,7 +52,18 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'flex-end',
         height: '100%',
-    },
+    }, avatar: {
+        margin: 8,
+        marginTop: 50,
+        height: 200,
+        width: 200,
+    }, a: {
+        fontWeight: '100',
+        color: '#FF3366', // make links coloured pink
+      },
+      br:{
+        marginBottom: -50,
+      }
 });
 
 export default Profile;

@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, StatusBar } from 'react-native';
 import { Layout, Button, List, ListItem, Icon } from '@ui-kitten/components';
 
-const data = new Array(50).fill({
+const data = new Array(20).fill({
     title: 'Fucking Weeb',
     description: 'Description for Item',
 });

@@ -104,17 +104,17 @@ const SignUp = props => {
                           watching_status: element.watching_status
                         })
                       }
-                    })()
+                    })().catch(e => { })
                   })
-                })().then(() => {
-                  navigation.navigate('SignIn', {
-                    email: email,
-                    password: password,
-                  });
-                })
-              })();
-          })();
-        })
+                })().catch(e => { })
+              })().catch(e => { });
+          })().catch(e => { });
+        }).catch(e => { }).then(() => {
+          navigation.navigate('SignIn', {
+            email: email,
+            password: password,
+          });
+        });
     } catch (error) {
       console.error(error);
     }
