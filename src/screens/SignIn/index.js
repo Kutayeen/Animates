@@ -47,20 +47,27 @@ const SignIn = props => {
     React.useEffect(() => {
       setEmail(email => (props.route.params.email));
       setpassword(password => (props.route.params.password));
+      readData();
     }, [props.route.params]);
   };
 
   React.useEffect(() => {
     if (user['isLogged']) {
       console.log(user);
-      navigation.dispatch(CommonActions.reset({
-        index: 1,
-        routes: [{
-          name: 'Home', params: user,
-        },
-        ],
-      })
-      );
+      (async () => {
+        await auth().signInWithEmailAndPassword(user['email'], user['password']).then(() => {
+          navigation.dispatch(CommonActions.reset({
+            index: 1,
+            routes: [{
+              name: 'Home', params: { 'email': user['email'], 'myanimelist': user['myanimelist'], 'password': user['password'], 'isLogged': true },
+            },
+            ],
+          })
+          );
+        }).catch(function (error) {
+          alert(error.message);
+        });
+      })()
     }
   }, [user]);
 
@@ -85,42 +92,47 @@ const SignIn = props => {
   }, []);
 
   const signInfunction = async (email, password) => {
-    if (user['myanimelist'] !== '') {
-      await auth().signInWithEmailAndPassword(email, password).then(() => {
-        saveData(user['myanimelist']);
-        navigation.dispatch(CommonActions.reset({
-          index: 1,
-          routes: [{
-            name: 'Home', params: { 'email': email, 'myanimelist': user['myanimelist'], 'password': password, 'isLogged': true },
-          },
-          ],
-        })
-        );
-      }).catch(function (error) {
-        alert(error);
-      });
-    } else {
-      try {
-        const myanimelist_ = await firestore()
-          .collection('users')
-          .where('email', '==', email)
-          .get();
+    if (email && password) {
+      if (user['myanimelist'] !== '') {
         await auth().signInWithEmailAndPassword(email, password).then(() => {
-          saveData(myanimelist_['myanimelist']);
+          saveData(user['myanimelist']);
           navigation.dispatch(CommonActions.reset({
             index: 1,
             routes: [{
-              name: 'Home', params: { 'email': email, 'myanimelist': myanimelist_['myanimelist'], 'password': password, 'isLogged': true },
+              name: 'Home', params: { 'email': email, 'myanimelist': user['myanimelist'], 'password': password, 'isLogged': true },
             },
             ],
           })
           );
         }).catch(function (error) {
-          console.log(error);
+          alert(error);
         });
-      } catch (e) {
-        alert(e.message);
+      } else {
+        try {
+          const myanimelist_ = await firestore()
+            .collection('users')
+            .where('email', '==', email)
+            .get();
+          await auth().signInWithEmailAndPassword(email, password).then(() => {
+            console.log(myanimelist_._docs[0]._data)
+            saveData(myanimelist_._docs[0]._data['myanimelist']);
+            navigation.dispatch(CommonActions.reset({
+              index: 1,
+              routes: [{
+                name: 'Home', params: { 'email': email, 'myanimelist': myanimelist_._docs[0]._data['myanimelist'], 'password': password, 'isLogged': true },
+              },
+              ],
+            })
+            );
+          }).catch(function (error) {
+            console.log(error);
+          });
+        } catch (e) {
+          alert(e.message);
+        }
       }
+    } else {
+      alert("Fill all fields.");
     }
   }
 

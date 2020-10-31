@@ -47,7 +47,7 @@ const SignUp = props => {
                 description: myanime.about,
                 gender: myanime.gender,
                 birthday: myanime.birthday,
-                image_url: myanime.image_url,
+                image_url: myanime.image_url.split('?')[0],
                 location: myanime.location,
                 url: myanime.url,
                 user_id: myanime.user_id,
@@ -64,57 +64,62 @@ const SignUp = props => {
                       break;
                     }
                   };
-                  await animelist.forEach(element => {
-                    (async () => {
-                      const anime_data = await firestore().collection('AnimeList').doc(element.title);
-                      const doc = await anime_data.get();
-                      if (doc.exists) {
-                        await anime_data.collection('Users').doc(user).set({
-                          score: element.score,
-                          is_rewatching: element.is_rewatching,
-                          watched_episodes: element.watched_episodes,
-                          watching_status: element.watching_status
-                        })
-                      } else {
-                        await anime_data.set({
-                          id: element.mal_id,
-                          image_url: element.image_url,
-                          added_to_list: element.added_to_list,
-                          airing_status: element.airing_status,
-                          end_date: element.end_date,
-                          has_episode_video: element.has_episode_video,
-                          has_promo_video: element.has_promo_video,
-                          has_video: element.has_video,
-                          licensors: element.licensors,
-                          priority: element.priority,
-                          rating: element.rating,
-                          start_date: element.start_date,
-                          studios: element.studios,
-                          title: element.title,
-                          total_episodes: element.total_episodes,
-                          type: element.type,
-                          url: element.url,
-                          video_url: element.video_url
+                  const finished = new Promise((resolve, reject) => {
+                    animelist.forEach((element, index, array) => {
+                      (async () => {
+                        const anime_data = await firestore().collection('AnimeList').doc(element.title);
+                        const doc = await anime_data.get();
+                        if (doc.exists) {
+                          await anime_data.collection('Users').doc(user).set({
+                            score: element.score,
+                            is_rewatching: element.is_rewatching,
+                            watched_episodes: element.watched_episodes,
+                            watching_status: element.watching_status
+                          })
+                        } else {
+                          await anime_data.set({
+                            id: element.mal_id,
+                            image_url: element.image_url,
+                            added_to_list: element.added_to_list,
+                            airing_status: element.airing_status,
+                            end_date: element.end_date,
+                            has_episode_video: element.has_episode_video,
+                            has_promo_video: element.has_promo_video,
+                            has_video: element.has_video,
+                            licensors: element.licensors,
+                            priority: element.priority,
+                            rating: element.rating,
+                            start_date: element.start_date,
+                            studios: element.studios,
+                            title: element.title,
+                            total_episodes: element.total_episodes,
+                            type: element.type,
+                            url: element.url,
+                            video_url: element.video_url
+                          }
+                          )
+                          await anime_data.collection('Users').doc(user).set({
+                            score: element.score,
+                            is_rewatching: element.is_rewatching,
+                            watched_episodes: element.watched_episodes,
+                            watching_status: element.watching_status
+                          })
                         }
-                        )
-                        await anime_data.collection('Users').doc(user).set({
-                          score: element.score,
-                          is_rewatching: element.is_rewatching,
-                          watched_episodes: element.watched_episodes,
-                          watching_status: element.watching_status
-                        })
-                      }
-                    })().catch(e => { })
-                  })
+                      })().catch(e => { })
+                      if (index === array.length - 1) resolve();
+                    }).catch(e => { })
+                  });
+                  finished.then(() => {
+                    navigation.navigate('SignIn', {
+                      email: email,
+                      password: password,
+                      myanimelist: myanimelist
+                    })
+                  });
                 })().catch(e => { })
               })().catch(e => { });
           })().catch(e => { });
-        }).catch(e => { }).then(() => {
-          navigation.navigate('SignIn', {
-            email: email,
-            password: password,
-          });
-        });
+        })
     } catch (error) {
       console.error(error);
     }

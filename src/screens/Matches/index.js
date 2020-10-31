@@ -2,32 +2,29 @@ import React from 'react';
 import { StyleSheet, StatusBar } from 'react-native';
 import { Layout, Button, List, ListItem, Icon } from '@ui-kitten/components';
 
-const data = new Array(20).fill({
+const data = new Array(10).fill({
     title: 'Fucking Weeb',
     description: 'Description for Item',
 });
 
+const renderItemIcon = (props) => (
+    <Icon {...props} name='person' />
+);
+
+const renderItem = ({ item, index }) => (
+    <ListItem
+        title={`${item.title} ${index + 1}`}
+        description={`${item.description} ${index + 1}`}
+        accessoryLeft={renderItemIcon}
+    />
+);
+
 const Matches = props => {
     const { navigation } = props;
-    const renderItemAccessory = (props) => (
-        <Button size='tiny'>FOLLOW</Button>
-    );
-
-    const renderItemIcon = (props) => (
-        <Icon {...props} name='person' />
-    );
-
-    const renderItem = ({ item, index }) => (
-        <ListItem
-            title={`${item.title} ${index + 1}`}
-            description={`${item.description} ${index + 1}`}
-            accessoryLeft={renderItemIcon}
-            accessoryRight={renderItemAccessory}
-        />
-    );
+    
 
     return (
-        <Layout >
+        <Layout style={styles.layout}>
             <StatusBar hidden={true} />
             <List
                 style={styles.container}
@@ -40,9 +37,11 @@ const Matches = props => {
 
 const styles = StyleSheet.create({
     layout: {
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        backgroundColor: 'white',
+        height: '100%',
+        justifyContent: 'flex-start',
     },
     bottomNavigation: {
         marginVertical: 8,
